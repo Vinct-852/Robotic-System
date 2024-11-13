@@ -9,19 +9,64 @@
 
 #include <cstdint>
 
-CAN can1(PD_0, PD_1, canBaudRate); // Can bus linux to STM 
-CAN can2(PB_5, PB_6, canBaudRate); // Can bus STM to Linux 
-CAN can3(PB_3, PB_4, canBaudRate); // Can bus motors to STM
+/**
+ * @file       cchs_can_bus.h
+ * @author     Ki C
+ * @email      polyu.robocon@gmail.com
+ * @brief      This stm program is a part of robot Architecture, named CCHS
+ * @version    1.0.0Thread
+ * @date       27-12-2023
+ * @copyright  Copyright (c) 2023
+ *
+ * @section    LICENSE
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *Thread
+ * //————————————Swerve Drive Chassis Steering and driving modules CAN ID configurations————————————//
+ *
+ *
+ *       /----- --Front-------\           ---           Modulus Config
+ *       | [5]            [6] |            |
+ *       |   {1}        {2}   |            |             [1]------[2]
+ *       |                    |            |              |        |
+ *    Left                    Right      Length           |        |
+ *       |                    |            |              |        |
+ *       |   {3}        {4}   |            |             [3]------[4]
+ *       | [7]            [8] |            |
+ *       \--------Aft---------/           ---
+ *
+ *
+ *      |---------Width--------|
+ *
+ * [Driving module];
+ * {Steering Module}
+ */
+
+
+const int canBaudRate = 1000000;   // 1000000
+CAN can1(PD_0, PD_1, canBaudRate); // Can bus for transceiving controller commands (Linux to STM)
+CAN can2(PB_5, PB_6, canBaudRate); // Can bus for transceiving chassis vesc commands (STM to Linux)
+CAN can3(PB_3, PB_4, canBaudRate); // Can bus for transceiving sensor data (Motors to STM)
+
+//InterruptIn button(PC_13);
 
 //-------------------------------CAN 1-------------------------------//
 typedef enum
 {
-      CAN_PACKET_CHASSIS_COMMAND_SPEED_X__Y = 0,
-      CAN_PACKET_CHASSIS_COMMAND_SPEED_W,
-      CAN_PACKET_CCHS_ALIVE_STATE,
-      CAN_MOTOR_CONTROL_TESTING,
+    CAN_PACKET_CHASSIS_COMMAND_SPEED_X__Y = 0,
+    CAN_PACKET_CHASSIS_COMMAND_SPEED_W,
+    CAN_PACKET_CCHS_ALIVE_STATE,
+    CAN_MOTOR_CONTROL_TESTING,
 
-} CAN_PACKET_CHASSIS_ID;
+} CAN_1_COMMAND;
 
 //-------------------------------CAN 2-------------------------------//
 int canDrivingId[4] = {5, 6, 7, 8}; // ref above graph
@@ -30,7 +75,7 @@ const int canAliveStateId = 5;
 CANMessage rx1Msg;
 CANMessage rx2Msg;
 
-static BufferedSerial pc(USBTX, USBRX);
+//static BufferedSerial pc(USBTX, USBRX);
 
 Vesc _vesc;
 
@@ -58,11 +103,23 @@ void vesc_read()
     {
         _vesc.can_read(canDrivingId[i]);
         _vesc.can_read(canSteeringId[i]);
+        // getDrivingRpm[i] = _vesc.read_rpm(canDrivingId[i]);
+        // printf("%f\r\n", getDrivingRpm[i]);
+        // getSteeringAngle[i] = _vesc.read_pos(canSteeringId[i]);
+        // printf("%f\r\n", getSteeringAngle[i]);
     }
 }
 
 void printMsg(CANMessage &msg)
 {
+    // printf("  ID      = 0x%.3x\r\n", msg.id);
+    // printf("  Type    = %d\r\n", msg.type);
+    // printf("  Format  = %d\r\n", msg.format);
+    // printf("  Length  = %d\r\n", msg.len);
+    // printf("  Data    =");
+    // for(int i = 0; i < msg.len; i++)
+    //     printf(" 0x%.2X", msg.data[i]);
+    // printf("\r\n");
     printf("  ID      = 0x%.3x   ", msg.id);
     printf("%02X", msg.data[0]);
     printf("\r\n");
@@ -127,9 +184,6 @@ void can1MessageHandler(CANMessage msg)
     }
     case 87:
     {
-        int dir = msg.data[0];
-        printf("direction: %d\r\n", dir);
-        turn_around(dir);
 
         break;
     }
@@ -143,29 +197,7 @@ void can1MessageHandler(CANMessage msg)
     }
     }
 }
-void can2MessageHandler(CANMessage msg){
 
-    printf("CAN Message:\n");
-    printf("ID: %u\n", msg.id);
-    printf("Can_ID: %u\n", msg.id & 0xFF);
-    printf("Data: ");
-    for (int i = 0; i < msg.len; ++i) {
-        printf("%02X ", msg.data[i]);
-    }
-    printf("\n");
-    printf("Length: %u\n", msg.len);
-    //printf("Format: %s\n", msg.format == STANDARD_FORMAT ? "Standard" : "Extended");
-    //printf("Type: %s\n", msg.type == DATA_FRAME ? "Data Frame" : "Remote Frame");
-    //int msgId = msg.id;
-    // switch (msgId)
-    // {
-    //     case CAN_MOTOR_CONTROL_TESTING:
-    //     {
-    //         data = {msg.data[0]};
-    //         printf("received data[0]: %f\r\n", data);
-    //     }
-    // }
-}
 void can1Listener()
 {
     while (true)
@@ -185,6 +217,20 @@ void can1Listener()
         // printf("can ping\n");
     }
 }
+
+void can2MessageHandler(CANMessage msg){
+
+    printf("CAN Message:\n");
+    printf("ID: %u\n", msg.id);
+    printf("Can_ID: %u\n", msg.id & 0xFF);
+    printf("Data: ");
+    for (int i = 0; i < msg.len; ++i) {
+        printf("%02X ", msg.data[i]);
+    }
+    printf("\n");
+    printf("Length: %u\n", msg.len);
+}
+
 void can2Listener()
 {
     while (true)
@@ -197,11 +243,12 @@ void can2Listener()
                 can2.reset();
             }
             else {
-                //can2MessageHandler(rx2Msg);
+                can2MessageHandler(rx2Msg);
             }
         }
     }
 }
+
 void stmAliveStateSender() // Send alive state to the CAN Bus
 {
     while (true)
@@ -212,6 +259,7 @@ void stmAliveStateSender() // Send alive state to the CAN Bus
 }
 
 bool flag = false;
+
 void vescPublisher()
 {
     while (true)
@@ -261,21 +309,18 @@ void vescPublisher()
     }
 }
 
+// uint8_t button_detect = 0;
 
+// void button_handler() {
+//     button_detect = 1;
+// }
 
-vesc_control jumping_vesc = vesc_control(&can2, 69, canBaudRate);
-Thread jumping_vesc_thread;
-
-void jumping_vesc_vontrol() {
-    while(true) {
-        printf("running!");
-        jumping_vesc.set_rpm(5000);
-    }
-}
 
 
 int main()
-{    
+{
+    //button.rise(&button_handler);
+    
     _vesc.vesc_init(&can2, canBaudRate); // VESC Initialization
     
     for (int i = 0; i < 4; i++)
@@ -291,7 +336,8 @@ int main()
 
     // Threads
     canThread.start(can1Listener);               // listen to can1
+    // can2Thread.start(can2Listener); 
     aliveStateThread.start(stmAliveStateSender); // send alive state
-    publishVescThread.start(vescPublisher);      
+    publishVescThread.start(vescPublisher);      //
+    
 }
-
