@@ -38,7 +38,7 @@ ax.plot([shooter_x, hoop_x], [shooter_y, hoop_y], color='green', linestyle='--',
         label=f'Horizontal Distance: {horizontal_distance:.2f} m')
 
 # Load the shared library
-lib = ctypes.CDLL('./Shooter/trajectory_dll.dll')
+lib = ctypes.CDLL('./Shooter/libtrajectory.so')
 lib.calculate_velocity.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_double]
 lib.calculate_velocity.restype = ctypes.c_double
 
