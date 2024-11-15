@@ -2,7 +2,6 @@
 #include <cmath>
 #include <iomanip>
 #include <vector>
-#include <corecrt_math_defines.h>
 #include <float.h>
 
 /*
@@ -26,7 +25,8 @@
 */
 
 #define g 9.81 // Acceleration due to gravity (m/s^2)
-#define H_RIM 2430 // The height of the hoop (mm)
+#define H_RIM 2.43 // The height of the hoop (mm)
+#define M_PI 3.14159265358979323846 // Define M_PI manually
 #define ERROR_TOLERANCE 2 
 
 class trajectory {
@@ -101,3 +101,21 @@ public:
 private:
     
 };
+
+extern "C" {
+    trajectory* create_trajectory() {
+        return new trajectory();
+    }
+
+    void destroy_trajectory(trajectory* t) {
+        delete t;
+    }
+
+    double calculate_velocity(trajectory* t, double D, double H_shooter, double angle) {
+        return t->calculate_velocity(D, H_shooter, angle);
+    }
+
+    double calculate_angle(trajectory* t, double D, double H_shooter, double velocity) {
+        return t->calculate_angle(D, H_shooter, velocity);
+    }
+}
