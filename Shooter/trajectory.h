@@ -3,7 +3,12 @@
 #include <iomanip>
 #include <vector>
 #include <float.h>
+#include <limits> 
 
+/*
+gcc -c -fPIC trajectory.cpp -o trajectory.o
+g++ -shared -Wl,-soname,trajectory.so -o trajectory.so  trajectory.o
+*/
 
 /*
 1.  The best way to shoot free throws depends upon the person
@@ -26,7 +31,7 @@
 */
 
 #define g 9.81 // Acceleration due to gravity (m/s^2)
-#define H_RIM 2.43 // The height of the hoop (mm)
+#define H_RIM 2.43 // The height of the hoop (m)
 #define M_PI 3.14159265358979323846 // Define M_PI manually
 #define ERROR_TOLERANCE 2 
 
