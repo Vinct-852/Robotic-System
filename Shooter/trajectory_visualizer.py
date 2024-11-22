@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import ctypes
+from ctypes import cdll, c_double, POINTER
 import math
 
 court_length = 15.24          # Length from baseline to free-throw line (15 feet)
@@ -38,16 +38,30 @@ ax.plot([shooter_x, hoop_x], [shooter_y, hoop_y], color='green', linestyle='--',
         label=f'Horizontal Distance: {horizontal_distance:.2f} m')
 
 # Load the shared library
-lib = ctypes.CDLL('./Shooter/libtrajectory.so')
-lib.calculate_velocity.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_double]
-lib.calculate_velocity.restype = ctypes.c_double
+lib = cdll.LoadLibrary('./Shooter/libtrajectory.so')
 
-t = lib.create_trajectory()
+class Trajectory(object):
+    def __init__(self):
+        # Create an instance of trajectory
+        self.obj = lib.create_trajectory()
+
+    def __del__(self):
+        # Clean up by destroying the trajectory instance
+        lib.destroy_trajectory(self.obj)
+
+    def calculate_velocity(self, D, H_shooter, angle):
+        # Call calculate_velocity from the C++ library
+        lib.calculate_velocity.argtypes = [POINTER(c_double), c_double, c_double, c_double]
+        lib.calculate_velocity.restype = c_double
+        
+        # Call the function and return the result
+        velocity = lib.calculate_velocity(self.obj, c_double(D), c_double(H_shooter), c_double(angle))
+        return velocity
+
+trajectory = Trajectory()
 angle = math.radians(45)
-velocity = lib.calculate_velocity(t, horizontal_distance, shooter_z, angle)
+velocity = trajectory.calculate_velocity(horizontal_distance, shooter_z, angle)
 print(f"Calculated Velocity: {velocity:.2f} m/s")
-
-lib.destroy_trajectory(t)
 
 # Set limits for better visualization
 ax.set_xlim(0, court_length)
