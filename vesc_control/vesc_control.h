@@ -74,7 +74,7 @@ class vesc_control {
         //void set_current(int id, float current);                //set the current set point for the motor in A
         //void set_current_brake(int id, float current);          //set the braking current of the motor in A
 
-    private:   
+    protected:   
 
         int can_id;
         

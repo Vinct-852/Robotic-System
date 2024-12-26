@@ -1,18 +1,4 @@
 #include "trajectory.h"
-// #include <pybind11/pybind11.h>
-// #include <pybind11/eigen.h>
-
-// namespace py = pybind11;
-
-// PYBIND11_MODULE(MyLib, m) {
-//     m.doc() = "trajectory";
-
-//     py::class_<MyClass>(m, "trajectory")
-//     .def(py::init<double, double, int>())  
-//     .def("calculate_velocity", &trajectory::calculate_velocity, py::call_guard<py::gil_scoped_release>())
-    
-//     ;
-// }
 
 double trajectory::calculate_velocity(double D, double H_shooter, double angle) {
     double velocity = 0;

@@ -138,17 +138,11 @@ void turn_around(int direction) {
         _vesc.set_rpm(69,1000);
         // the rpm 1000 is around the minimum value we can set
         ThisThread::sleep_for(50ms);
-
-   
     }
     else{
         _vesc.set_rpm(69,-1000);
         ThisThread::sleep_for(50ms);
-
-
     }
-
-    
 }
 
 void can1MessageHandler(CANMessage msg)
@@ -315,19 +309,21 @@ void vescPublisher()
 //     button_detect = 1;
 // }
 
+//************************* JUMPING *************************//
+#include "jumping_module.h"
 
 
 int main()
 {
-    //button.rise(&button_handler);
-    
-    _vesc.vesc_init(&can2, canBaudRate); // VESC Initialization
+    // VESC Initialization
+    _vesc.vesc_init(&can2, canBaudRate); 
     
     for (int i = 0; i < 4; i++)
     {
         _vesc.set_monitor_id(canDrivingId[i]);
         _vesc.set_monitor_id(canSteeringId[i]);
     }
+
     _vesc.set_monitor_id(69);
 
     // Main Setup Program

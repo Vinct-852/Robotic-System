@@ -57,8 +57,8 @@ void vesc_control::set_rpm(float rpm) {
   int32_t send_index = 0;
   uint8_t buffer[4];
   package_msg(buffer, (int32_t)rpm, &send_index);
-  printf("%d", this->can_id);
-  printf("%x", this->can_id | ((uint32_t)CAN_PACKET_SET_RPM << 8));
+  // printf("%d", this->can_id);
+  // printf("%x", this->can_id | ((uint32_t)CAN_PACKET_SET_RPM << 8));
   can_send(this->can_id | ((uint32_t)CAN_PACKET_SET_RPM << 8), buffer);
 }
 
