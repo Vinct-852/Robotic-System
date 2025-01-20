@@ -1,6 +1,6 @@
 #include "shooting_module.h"
 
-shooting_module::shooting_module(CAN* can, std::vector<int> can_id_list)
+Shooting_module::Shooting_module(CAN* can, std::vector<int> can_id_list)
 {
     // Check if can_id_list has at least 5 elements
     if (can_id_list.size() < 5) {
@@ -14,7 +14,7 @@ shooting_module::shooting_module(CAN* can, std::vector<int> can_id_list)
     right_2_motor = vesc_control(can, can_id_list[4]);
 }
 
-int shooting_module::set_shooter_rmp(float rpm)
+int Shooting_module::set_all_shooter_rmp(float rpm)
 {
     try
     {
@@ -30,5 +30,28 @@ int shooting_module::set_shooter_rmp(float rpm)
         return -1;
     }
 
+    return 0;
+}
+
+int Shooting_module::fixed_angle_shoot(double distant, double shooter_height, double angle)
+{
+    try
+    {
+        double velocity = calculate_velocity(distant, shooter_height, angle)/SHOOTING_MOTORS_NUMBER;
+        // velocity to rpm (V / (π × D)) × 60
+        float rpm = (velocity/(M_PI*SHOOTING_MOTORS_DIAMETOR))*60;
+
+        int res set_all_shooter_rmp(rpm);
+        if(res != 0){
+            printf("set_all_shooter_rmp failed\n");
+            return -1;
+        }
+    }   
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return -1;
+    }
+    
     return 0;
 }

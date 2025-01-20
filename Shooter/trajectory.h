@@ -41,7 +41,7 @@ public:
     /*
         Calulate the required velocity by distant, height and angle
     */
-    double calculate_velocity(double D, double H_shooter, double angle);
+    static double calculate_velocity(double D, double H_shooter, double angle);
 
     /*
         Calulate the best angle by distant, height and velocity
